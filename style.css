@@ -1,0 +1,89 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.left-column {
+  width: 20%;
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.right-column {
+  width: 25%;
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  color: #1a73e8;
+}
+
+#team-list {
+  list-style: none;
+  padding: 0;
+}
+
+#team-list li {
+  cursor: pointer;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+#team-list li:hover {
+  background-color: #e8f0fe;
+}
+
+#chatbox {
+  display: flex;
+  flex-direction: column;
+  height: 80%;
+}
+
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+#user-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+#send-btn {
+  padding: 10px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#send-btn:hover {
+  background-color: #174ea6;
+}
