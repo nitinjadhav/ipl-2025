@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL 2025 Schedule</title>
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e2e;
+            color: #c9d1d9;
+            margin: 0;
+        }
+        .sidebar {
+            width: 20%;
+            padding: 20px;
+            background: #2e2e3e;
+            color: white;
+            height: 100vh;
+        }
+        .content {
+            width: 60%;
+            padding: 20px;
+            background: #282838;
+            overflow-y: auto;
+        }
+        .chatbot {
+            width: 20%;
+            padding: 20px;
+            background: #2e2e3e;
+            color: white;
+            height: 100vh;
+        }
+        .team, .match, .calendar-tab {
+            cursor: pointer;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            background: #3e3e4e;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .team:hover, .match:hover, .calendar-tab:hover {
+            background: #505060;
+        }
+        button {
+            background: #ff9800;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            color: white;
+            margin-top: 10px;
+            width: 100%;
+        }
+        button:hover {
+            background: #e68900;
+        }
+        input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: #444;
+            color: #c9d1d9;
+            width: calc(100% - 20px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2e2e3e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+        .modal button {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Teams</h2>
+        <div id="teamList"></div>
+        <h2>Calendar</h2>
+        <div class="calendar-tab" onclick="showCalendarMatches()">Calendar wise</div>
+    </div>
+    <div class="content">
+        <h2>Match Schedule</h2>
+        <div id="matchList"></div>
+    </div>
+    <div class="chatbot">
+        <h2>Chatbot</h2>
+        <div id="chat"></div>
+        <input type="text" id="userInput" placeholder="Ask something...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div id="matchModal" class="modal">
+        <h3 id="modalTitle"></h3>
+        <p id="modalDetails"></p>
+        <button id="addCalendar">Add to Google Calendar</button>
+        <button onclick="closeModal()">Close</button>
+    </div>
+
+    <script>
+        const teams = [
+            "Kolkata Knight Riders", "Sunrisers Hyderabad", "Chennai Super Kings", "Delhi Capitals",
+            "Gujarat Titans", "Rajasthan Royals", "Mumbai Indians", "Lucknow Super Giants",
+            "Royal Challengers Bengaluru", "Punjab Kings"
+        ];
+
+        const matches = [
+    { matchNo: 1, date: "22-Mar-25", day: "Sat", time: "7:30 PM", home: "Kolkata Knight Riders", away: "Royal Challengers Bengaluru", venue: "Kolkata" },
+    { matchNo: 2, date: "23-Mar-25", day: "Sun", time: "3:30 PM", home: "Sunrisers Hyderabad", away: "Rajasthan Royals", venue: "Hyderabad" },
+    { matchNo: 3, date: "23-Mar-25", day: "Sun", time: "7:30 PM", home: "Chennai Super Kings", away: "Mumbai Indians", venue: "Chennai" },
+    { matchNo: 4, date: "24-Mar-25", day: "Mon", time: "7:30 PM", home: "Delhi Capitals", away: "Lucknow Super Giants", venue: "Visakhapatnam" },
+    { matchNo: 5, date: "25-Mar-25", day: "Tue", time: "7:30 PM", home: "Gujarat Titans", away: "Punjab Kings", venue: "Ahmedabad" },
+    { matchNo: 6, date: "26-Mar-25", day: "Wed", time: "7:30 PM", home: "Rajasthan Royals", away: "Kolkata Knight Riders", venue: "Guwahati" },
+    { matchNo: 7, date: "27-Mar-25", day: "Thu", time: "7:30 PM", home: "Sunrisers Hyderabad", away: "Lucknow Super Giants", venue: "Hyderabad" },
+    { matchNo: 8, date: "28-Mar-25", day: "Fri", time: "7:30 PM", home: "Chennai Super Kings", away: "Royal Challengers Bengaluru", venue: "Chennai" },
+    { matchNo: 9, date: "29-Mar-25", day: "Sat", time: "7:30 PM", home: "Gujarat Titans", away: "Mumbai Indians", venue: "Ahmedabad" },
+    { matchNo: 10, date: "30-Mar-25", day: "Sun", time: "3:30 PM", home: "Delhi Capitals", away: "Sunrisers Hyderabad", venue: "Visakhapatnam" },
+    { matchNo: 11, date: "30-Mar-25", day: "Sun", time: "7:30 PM", home: "Rajasthan Royals", away: "Chennai Super Kings", venue: "Guwahati" },
+    { matchNo: 12, date: "31-Mar-25", day: "Mon", time: "7:30 PM", home: "Mumbai Indians", away: "Kolkata Knight Riders", venue: "Mumbai" },
+    { matchNo: 13, date: "01-Apr-25", day: "Tue", time: "7:30 PM", home: "Lucknow Super Giants", away: "Punjab Kings", venue: "Lucknow" },
+    { matchNo: 14, date: "02-Apr-25", day: "Wed", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Gujarat Titans", venue: "Bengaluru" },
+    { matchNo: 15, date: "03-Apr-25", day: "Thu", time: "7:30 PM", home: "Kolkata Knight Riders", away: "Sunrisers Hyderabad", venue: "Kolkata" },
+    { matchNo: 16, date: "04-Apr-25", day: "Fri", time: "7:30 PM", home: "Lucknow Super Giants", away: "Mumbai Indians", venue: "Lucknow" },
+    { matchNo: 17, date: "05-Apr-25", day: "Sat", time: "3:30 PM", home: "Chennai Super Kings", away: "Delhi Capitals", venue: "Chennai" },
+    { matchNo: 18, date: "05-Apr-25", day: "Sat", time: "7:30 PM", home: "Punjab Kings", away: "Rajasthan Royals", venue: "New Chandigarh" },
+    { matchNo: 19, date: "06-Apr-25", day: "Sun", time: "3:30 PM", home: "Kolkata Knight Riders", away: "Lucknow Super Giants", venue: "Kolkata" },
+    { matchNo: 20, date: "06-Apr-25", day: "Sun", time: "7:30 PM", home: "Sunrisers Hyderabad", away: "Gujarat Titans", venue: "Hyderabad" },
+    { matchNo: 21, date: "07-Apr-25", day: "Mon", time: "7:30 PM", home: "Mumbai Indians", away: "Royal Challengers Bengaluru", venue: "Mumbai" },
+    { matchNo: 22, date: "08-Apr-25", day: "Tue", time: "7:30 PM", home: "Punjab Kings", away: "Chennai Super Kings", venue: "New Chandigarh" },
+    { matchNo: 23, date: "09-Apr-25", day: "Wed", time: "7:30 PM", home: "Gujarat Titans", away: "Rajasthan Royals", venue: "Ahmedabad" },
+    { matchNo: 24, date: "10-Apr-25", day: "Thu", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Delhi Capitals", venue: "Bengaluru" },
+    { matchNo: 25, date: "11-Apr-25", day: "Fri", time: "7:30 PM", home: "Chennai Super Kings", away: "Kolkata Knight Riders", venue: "Chennai" },
+    { matchNo: 26, date: "12-Apr-25", day: "Sat", time: "3:30 PM", home: "Lucknow Super Giants", away: "Gujarat Titans", venue: "Lucknow" },
+    { matchNo: 27, date: "12-Apr-25", day: "Sat", time: "7:30 PM", home: "Sunrisers Hyderabad", away: "Punjab Kings", venue: "Hyderabad" },
+    { matchNo: 28, date: "13-Apr-25", day: "Sun", time: "3:30 PM", home: "Rajasthan Royals", away: "Royal Challengers Bengaluru", venue: "Jaipur" },
+    { matchNo: 29, date: "13-Apr-25", day: "Sun", time: "7:30 PM", home: "Delhi Capitals", away: "Mumbai Indians", venue: "Delhi" },
+    { matchNo: 30, date: "14-Apr-25", day: "Mon", time: "7:30 PM", home: "Lucknow Super Giants", away: "Chennai Super Kings", venue: "Lucknow" },
+    { matchNo: 31, date: "15-Apr-25", day: "Tue", time: "7:30 PM", home: "Punjab Kings", away: "Kolkata Knight Riders", venue: "New Chandigarh" },
+    { matchNo: 32, date: "16-Apr-25", day: "Wed", time: "7:30 PM", home: "Delhi Capitals", away: "Rajasthan Royals", venue: "Delhi" },
+    { matchNo: 33, date: "17-Apr-25", day: "Thu", time: "7:30 PM", home: "Mumbai Indians", away: "Sunrisers Hyderabad", venue: "Mumbai" },
+    { matchNo: 34, date: "18-Apr-25", day: "Fri", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Punjab Kings", venue: "Bengaluru" },
+    { matchNo: 35, date: "19-Apr-25", day: "Sat", time: "3:30 PM", home: "Gujarat Titans", away: "Delhi Capitals", venue: "Ahmedabad" },
+    { matchNo: 36, date: "19-Apr-25", day: "Sat", time: "7:30 PM", home: "Rajasthan Royals", away: "Lucknow Super Giants", venue: "Jaipur" },
+    { matchNo: 37, date: "20-Apr-25", day: "Sun", time: "3:30 PM", home: "Punjab Kings", away: "Royal Challengers Bengaluru", venue: "New Chandigarh" },
+    { matchNo: 38, date: "20-Apr-25", day: "Sun", time: "7:30 PM", home: "Mumbai Indians", away: "Chennai Super Kings", venue: "Mumbai" },
+    { matchNo: 39, date: "21-Apr-25", day: "Mon", time: "7:30 PM", home: "Kolkata Knight Riders", away: "Gujarat Titans", venue: "Kolkata" },
+    { matchNo: 40, date: "22-Apr-25", day: "Tue", time: "7:30 PM", home: "Lucknow Super Giants", away: "Delhi Capitals", venue: "Lucknow" },
+    { matchNo: 41, date: "23-Apr-25", day: "Wed", time: "7:30 PM", home: "Sunrisers Hyderabad", away: "Mumbai Indians", venue: "Hyderabad" },
+    { matchNo: 42, date: "24-Apr-25", day: "Thu", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Rajasthan Royals", venue: "Bengaluru" },
+    { matchNo: 43, date: "25-Apr-25", day: "Fri", time: "7:30 PM", home: "Chennai Super Kings", away: "Sunrisers Hyderabad", venue: "Chennai" },
+    { matchNo: 44, date: "26-Apr-25", day: "Sat", time: "7:30 PM", home: "Kolkata Knight Riders", away: "Punjab Kings", venue: "Kolkata" },
+    { matchNo: 45, date: "27-Apr-25", day: "Sun", time: "3:30 PM", home: "Mumbai Indians", away: "Lucknow Super Giants", venue: "Mumbai" },
+    { matchNo: 46, date: "27-Apr-25", day: "Sun", time: "7:30 PM", home: "Delhi Capitals", away: "Royal Challengers Bengaluru", venue: "Delhi" },
+    { matchNo: 47, date: "28-Apr-25", day: "Mon", time: "7:30 PM", home: "Rajasthan Royals", away: "Gujarat Titans", venue: "Jaipur" },
+    { matchNo: 48, date: "29-Apr-25", day: "Tue", time: "7:30 PM", home: "Delhi Capitals", away: "Kolkata Knight Riders", venue: "Delhi" },
+    { matchNo: 49, date: "30-Apr-25", day: "Wed", time: "7:30 PM", home: "Chennai Super Kings", away: "Punjab Kings", venue: "Chennai" },
+    { matchNo: 50, date: "01-May-25", day: "Thu", time: "7:30 PM", home: "Rajasthan Royals", away: "Mumbai Indians", venue: "Jaipur" },
+    { matchNo: 51, date: "02-May-25", day: "Fri", time: "7:30 PM", home: "Gujarat Titans", away: "Sunrisers Hyderabad", venue: "Ahmedabad" },
+    { matchNo: 52, date: "03-May-25", day: "Sat", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Chennai Super Kings", venue: "Bengaluru" },
+    { matchNo: 53, date: "04-May-25", day: "Sun", time: "3:30 PM", home: "Kolkata Knight Riders", away: "Rajasthan Royals", venue: "Kolkata" },
+    { matchNo: 54, date: "04-May-25", day: "Sun", time: "7:30 PM", home: "Punjab Kings", away: "Lucknow Super Giants", venue: "Dharamsala" },
+    { matchNo: 55, date: "05-May-25", day: "Mon", time: "7:30 PM", home: "Sunrisers Hyderabad", away: "Delhi Capitals", venue: "Hyderabad" },
+    { matchNo: 56, date: "06-May-25", day: "Tue", time: "7:30 PM", home: "Mumbai Indians", away: "Gujarat Titans", venue: "Mumbai" },
+    { matchNo: 57, date: "07-May-25", day: "Wed", time: "7:30 PM", home: "Kolkata Knight Riders", away: "Chennai Super Kings", venue: "Kolkata" },
+    { matchNo: 58, date: "08-May-25", day: "Thu", time: "7:30 PM", home: "Punjab Kings", away: "Delhi Capitals", venue: "Dharamsala" },
+    { matchNo: 59, date: "09-May-25", day: "Fri", time: "7:30 PM", home: "Lucknow Super Giants", away: "Royal Challengers Bengaluru", venue: "Lucknow" },
+    { matchNo: 60, date: "10-May-25", day: "Sat", time: "7:30 PM", home: "Sunrisers Hyderabad", away: "Kolkata Knight Riders", venue: "Hyderabad" },
+    { matchNo: 61, date: "11-May-25", day: "Sun", time: "3:30 PM", home: "Punjab Kings", away: "Mumbai Indians", venue: "Dharamsala" },
+    { matchNo: 62, date: "11-May-25", day: "Sun", time: "7:30 PM", home: "Delhi Capitals", away: "Gujarat Titans", venue: "Delhi" },
+    { matchNo: 63, date: "12-May-25", day: "Mon", time: "7:30 PM", home: "Chennai Super Kings", away: "Rajasthan Royals", venue: "Chennai" },
+    { matchNo: 64, date: "13-May-25", day: "Tue", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Sunrisers Hyderabad", venue: "Bengaluru" },
+    { matchNo: 65, date: "14-May-25", day: "Wed", time: "7:30 PM", home: "Gujarat Titans", away: "Lucknow Super Giants", venue: "Ahmedabad" },
+    { matchNo: 66, date: "15-May-25", day: "Thu", time: "7:30 PM", home: "Mumbai Indians", away: "Delhi Capitals", venue: "Mumbai" },
+    { matchNo: 67, date: "16-May-25", day: "Fri", time: "7:30 PM", home: "Rajasthan Royals", away: "Punjab Kings", venue: "Jaipur" },
+    { matchNo: 68, date: "17-May-25", day: "Sat", time: "7:30 PM", home: "Royal Challengers Bengaluru", away: "Kolkata Knight Riders", venue: "Bengaluru" },
+    { matchNo: 69, date: "18-May-25", day: "Sun", time: "3:30 PM", home: "Gujarat Titans", away: "Chennai Super Kings", venue: "Ahmedabad" },
+    { matchNo: 70, date: "18-May-25", day: "Sun", time: "7:30 PM", home: "Lucknow Super Giants", away: "Sunrisers Hyderabad", venue: "Lucknow" },
+    { matchNo: 71, date: "20-May-25", day: "Tue", time: "7:30 PM", home: "", away: "Qualifier 1", venue: "Hyderabad" },
+    { matchNo: 72, date: "21-May-25", day: "Wed", time: "7:30 PM", home: "", away: "Eliminator", venue: "Hyderabad" },
+    { matchNo: 73, date: "23-May-25", day: "Fri", time: "7:30 PM", home: "", away: "Qualifier 2", venue: "Kolkata" },
+    { matchNo: 74, date: "25-May-25", day: "Sun", time: "7:30 PM", home: "", away: "Final", venue: "Kolkata" }
+];
+        
+        // for (let i = 1; i <= 74; i++) {
+        //     matches.push({
+        //         matchNo: i,
+        //         date: `March ${i % 31 + 1}, 2025`,
+        //         time: `${(i % 12) + 1}:00 PM`,
+        //         home: teams[Math.floor(Math.random() * teams.length)],
+        //         away: teams[Math.floor(Math.random() * teams.length)],
+        //         venue: "Stadium " + (i % 10 + 1)
+        //     });
+        // }
+
+        function displayTeams() {
+            const teamList = document.getElementById("teamList");
+            teams.forEach(team => {
+                const div = document.createElement("div");
+                div.className = "team";
+                div.innerText = team;
+                div.onclick = () => filterMatches(team);
+                teamList.appendChild(div);
+            });
+        }
+
+        function displayMatches(matchesToShow) {
+            if (!Array.isArray(matchesToShow)) {
+                console.error("matchesToShow is not an array", matchesToShow);
+                matchesToShow = [];
+            }
+            const matchList = document.getElementById("matchList");
+            matchList.innerHTML = "";
+            matchesToShow.forEach(match => {
+                const div = document.createElement("div");
+                div.className = "match";
+                div.innerHTML = `<strong>${match.date} | ${match.time}</strong>: ${match.home} vs ${match.away} at ${match.venue}`;
+                div.onclick = () => openModal(match);
+                matchList.appendChild(div);
+            });
+        }
+
+        function openModal(match) {
+            document.getElementById("modalTitle").innerText = `Match ${match.matchNo}: ${match.home} vs ${match.away}`;
+            document.getElementById("modalDetails").innerText = `Date: ${match.date} | Time: ${match.time} | Venue: ${match.venue}`;
+            document.getElementById("addCalendar").onclick = () => addToCalendar(match);
+            document.getElementById("matchModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("matchModal").style.display = "none";
+        }
+
+        function filterMatches(team) {
+            const filtered = matches.filter(match => match.home === team || match.away === team);
+            displayMatches(filtered);
+        }
+
+        function showCalendarMatches() {
+            displayMatches(matches);
+        }
+
+        function addToCalendar(match) {
+            alert(`Added Match ${match.matchNo} to calendar: ${match.home} vs ${match.away} on ${match.date} at ${match.time}`);
+        }
+
+        displayTeams();
+        displayMatches(matches);
+    </script>
+</body>
+</html>
